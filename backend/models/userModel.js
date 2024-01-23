@@ -37,6 +37,10 @@ const userSchema = new mongoose.Schema({
     type: String,
     default: "user",
   },
+  createdAt: {
+    type: Date,
+    default: Date.now,
+  },
 
   resetPasswordToken: String,
   resetPasswordExpire: Date,
@@ -50,6 +54,11 @@ userSchema.pre("save", async function (next) {
   this.password = await bcrypt.hash(this.password, 10);
 });
 
+userSchema.pre("findOneAndUpdate", function (next) {
+  this.options.runValidators = true;
+  next();
+});
+
 // JWT TOKEN
 userSchema.methods.getJWTToken = function () {
   return jwt.sign({ id: this._id }, process.env.JWT_SECRET, {
@@ -58,6 +67,7 @@ userSchema.methods.getJWTToken = function () {
 };
 
 // Compare Password
+
 userSchema.methods.comparePassword = async function (enteredPassword) {
   return await bcrypt.compare(enteredPassword, this.password);
 };
