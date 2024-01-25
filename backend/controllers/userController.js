@@ -168,10 +168,17 @@ exports.updatePassword = catchAsyncErrors(async (req, res, next) => {
 
 // update User Profile
 exports.updateProfile = catchAsyncErrors(async (req, res, next) => {
-  const newUserData = {
-    name: req.body.name,
-    email: req.body.email,
-  };
+  const { name, email } = req.body;
+
+  // Pre-validation
+  if (!name || !email) {
+    return res.status(400).json({
+      success: false,
+      message: "Name and email are required",
+    });
+  }
+
+  const newUserData = { name, email };
 
   // I will add cloudinary later
 
@@ -187,6 +194,5 @@ exports.updateProfile = catchAsyncErrors(async (req, res, next) => {
 
   res.status(200).json({
     success: true,
-    user,
   });
 });
