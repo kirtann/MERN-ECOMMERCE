@@ -222,3 +222,54 @@ exports.getSingleUser = catchAsyncErrors(async (req, res, next) => {
     user,
   });
 });
+
+// update User Role (admin)
+exports.updateUserRole = catchAsyncErrors(async (req, res, next) => {
+  const { name, email, role } = req.body;
+
+  // Pre-validation
+  if (!name || !email) {
+    return res.status(400).json({
+      success: false,
+      message: "Name and email are required",
+    });
+  }
+  if (!role) {
+    role = "admin";
+  }
+
+  const newUserData = { name, email, role };
+
+  const user = await User.findOneAndUpdate(
+    { _id: req.params.id },
+    { $set: newUserData },
+    {
+      new: true,
+      runValidators: true,
+      useFindAndModify: false,
+    }
+  );
+
+  res.status(200).json({
+    success: true,
+  });
+});
+
+// Delete User (admin)
+exports.deleteUser = catchAsyncErrors(async (req, res, next) => {
+  const user = await User.findById(req.params.id);
+
+  // We will remove cloudinary later
+
+  if (!user) {
+    return next(
+      new ErrorHandler(`User does not exist with Id: ${req.params.id}`, 404)
+    );
+  }
+
+  await User.deleteOne({ _id: req.params.id });
+
+  res.status(200).json({
+    success: true,
+  });
+});
